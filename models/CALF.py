@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from einops import rearrange
-from peft import LoraConfig, TaskType
+from peft import LoraConfig, TaskType, get_peft_model
 from models.GPT2_arch import AccustumGPT2Model
 
 class Encoder_PCA(nn.Module):
