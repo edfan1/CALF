@@ -37,11 +37,15 @@ def SMAPE(pred, true):
 def ND(pred, true):
     return np.mean(np.abs(true - pred)) / np.mean(np.abs(true))
 
+# def MASE(pred, true):
+#     np.mean(np.abs(forecast - outsample)) / np.mean(np.abs(insample[:-frequency] - insample[frequency:]))
+
 def metric(pred, true):
     mae = MAE(pred, true)
     mse = MSE(pred, true)
     rmse = RMSE(pred, true)
     mape = MAPE(pred, true)
     mspe = MSPE(pred, true)
+    smape = SMAPE(pred, true)
 
-    return mae, mse, rmse, mape, mspe
+    return mae, mse, rmse, mape, mspe, smape
