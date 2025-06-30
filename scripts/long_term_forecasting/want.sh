@@ -6,7 +6,7 @@ model=CALF
 for pred_len in 96 192 336 720
 do
 
-python run.py \
+python3 run.py \
     --root_path ./datasets/network/processed \
     --data_path snmp_first20.csv \
     --is_training 1 \
