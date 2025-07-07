@@ -1,6 +1,6 @@
 export CUDA_VISIBLE_DEVICES=0
 
-seq_len=168 # Increase sequence length for long-term forecasting = 1 week
+seq_len=84 # Increase sequence length for long-term forecasting = 1 week
 model=CALF
 
 # for pred_len in 96 192 336 720
