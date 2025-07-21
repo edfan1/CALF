@@ -313,8 +313,8 @@ if __name__ == "__main__":
     # List of possible locations for results directories
     potential_result_dirs = [
         os.path.join(project_root, 'results'),
-        os.path.join(project_root, 'checkpoints'),
-        project_root,  # Also check the root directory itself
+        #  os.path.join(project_root, 'checkpoints'),
+        #  project_root,  # Also check the root directory itself
     ]
     
     result_dirs = []
