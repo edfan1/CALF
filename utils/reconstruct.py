@@ -130,10 +130,157 @@ def unscale_and_calculate_metrics(result_folder, data_folder, dataset_file):
         pred_unscaled = pred_unscaled.reshape(original_pred_shape)
         true_unscaled = true_unscaled.reshape(original_true_shape)
     
-    # Ask if user wants to analyze a specific feature
-    analyze_specific = input("\nDo you want to analyze a specific feature? (y/n): ").lower() == 'y'
+    # Ask user what type of analysis they want to perform
+    print("\nAnalysis options:")
+    print("1. Analyze all features")
+    print("2. Analyze a single specific feature")
+    print("3. Analyze a subset of features by column names")
     
-    if analyze_specific and len(original_pred_shape) > 2:
+    analysis_choice = input("Select analysis type (1/2/3): ")
+    
+    if analysis_choice == '3' and len(original_pred_shape) > 2:
+        # Show all available features first
+        print("\nAvailable column names:")
+        for i, name in enumerate(column_names[:pred_unscaled.shape[2]]):
+            print(f"{i}: {name}")
+        
+        print("\nSpecify columns to analyze - either by:")
+        print("1. Comma-separated indices (e.g., '0,3,5')")
+        print("2. Comma-separated column names (e.g., 'column1,column3')")
+        
+        subset_input = input("\nEnter column indices or names: ")
+        
+        # Parse input - first try to parse as indices
+        try:
+            # Try parsing as indices first
+            indices = [int(idx.strip()) for idx in subset_input.split(',')]
+            selected_indices = [idx for idx in indices if 0 <= idx < pred_unscaled.shape[2]]
+            
+            if not selected_indices:
+                print("No valid indices provided. Analyzing all features.")
+                analysis_choice = '1'  # Fall back to all features
+            else:
+                print(f"Analyzing {len(selected_indices)} features by index")
+        except ValueError:
+            # If parsing as indices fails, try column names
+            col_names = [name.strip() for name in subset_input.split(',')]
+            selected_indices = []
+            
+            for name in col_names:
+                if name in column_names[:pred_unscaled.shape[2]]:
+                    idx = list(column_names).index(name)
+                    if idx < pred_unscaled.shape[2]:
+                        selected_indices.append(idx)
+                
+            if not selected_indices:
+                print("No valid column names found. Analyzing all features.")
+                analysis_choice = '1'  # Fall back to all features
+            else:
+                print(f"Analyzing {len(selected_indices)} features by name")
+        
+        if analysis_choice == '3':  # Only proceed if we didn't fall back
+            # Extract selected columns
+            pred_subset = pred_unscaled[:, :, selected_indices]
+            true_subset = true_unscaled[:, :, selected_indices]
+            names_subset = [column_names[i] for i in selected_indices]
+            
+            # Calculate metrics for each column in the subset
+            print("\n===== Metrics for Selected Columns =====")
+            
+            all_metrics = {}
+            
+            # Calculate aggregate metrics across all selected columns
+            mae_all = MAE(pred_subset, true_subset)
+            mse_all = MSE(pred_subset, true_subset)
+            mape_all = MAPE(pred_subset, true_subset)
+            smape_all = SMAPE(pred_subset, true_subset)
+            nd_all = ND(pred_subset, true_subset)
+            
+            print(f"AGGREGATE METRICS (all selected columns):")
+            print(f"MAE:   {mae_all:.6f}")
+            print(f"MSE:   {mse_all:.6f}")
+            print(f"MAPE:  {mape_all:.6f}%")
+            print(f"SMAPE: {smape_all:.6f}%")
+            print(f"ND:    {nd_all:.6f}")
+            print("\nINDIVIDUAL COLUMN METRICS:")
+            
+            # Calculate metrics for each individual column
+            for i, idx in enumerate(selected_indices):
+                col_name = column_names[idx] if idx < len(column_names) else f"Feature {idx}"
+                
+                # Extract single column data
+                pred_col = pred_unscaled[:, :, idx]
+                true_col = true_unscaled[:, :, idx]
+                
+                # Calculate metrics for this specific column
+                mae = MAE(pred_col, true_col)
+                mse = MSE(pred_col, true_col)
+                mape = MAPE(pred_col, true_col)
+                smape = SMAPE(pred_col, true_col)
+                nd = ND(pred_col, true_col)
+                
+                print(f"\n--- {col_name} ---")
+                print(f"MAE:   {mae:.6f}")
+                print(f"MSE:   {mse:.6f}")
+                print(f"MAPE:  {mape:.6f}%")
+                print(f"SMAPE: {smape:.6f}%")
+                print(f"ND:    {nd:.6f}")
+                
+                # Store metrics for this column
+                all_metrics[col_name] = {
+                    'MAE': mae,
+                    'MSE': mse,
+                    'MAPE': mape,
+                    'SMAPE': smape,
+                    'ND': nd
+                }
+            
+            # Option to visualize the subset
+            visualize = input("\nDo you want to visualize these columns? (y/n): ").lower() == 'y'
+            if visualize:
+                # Create directory for plots
+                os.makedirs(os.path.join(result_folder, 'plots'), exist_ok=True)
+                
+                # Generate sample plots for each selected column
+                for i, idx in enumerate(selected_indices):
+                    col_name = column_names[idx] if idx < len(column_names) else f"Feature {idx}"
+                    # Sample a few random time series for this column
+                    sample_indices = np.random.choice(pred_unscaled.shape[0], 
+                                                    min(3, pred_unscaled.shape[0]), 
+                                                    replace=False)
+                    
+                    for sample_idx in sample_indices:
+                        plt.figure(figsize=(12, 6))
+                        plt.plot(true_unscaled[sample_idx, :, idx], 'b-', 
+                               linewidth=2, label='Ground Truth')
+                        plt.plot(pred_unscaled[sample_idx, :, idx], 'r--', 
+                               linewidth=2, label='Prediction')
+                        plt.title(f"{col_name} - Sample #{sample_idx}", fontsize=14)
+                        plt.xlabel("Time Step")
+                        plt.ylabel("Value")
+                        plt.legend()
+                        plt.grid(True, alpha=0.3)
+                        plt.tight_layout()
+                        
+                        save_path = os.path.join(result_folder, 'plots', 
+                                              f'{col_name.replace(" ", "_")}_sample_{sample_idx}.png')
+                        plt.savefig(save_path)
+                        plt.close()
+            
+            # Add an option to save the metrics to a CSV
+            save_csv = input("\nDo you want to save metrics to a CSV file? (y/n): ").lower() == 'y'
+            if save_csv:
+                metrics_df = pd.DataFrame.from_dict(all_metrics, orient='index')
+                # Add the aggregate metrics as a row
+                metrics_df.loc['AGGREGATE'] = [mae_all, mse_all, mape_all, smape_all, nd_all]
+                metrics_file = os.path.join(result_folder, 'column_subset_metrics.csv')
+                metrics_df.to_csv(metrics_file)
+                print(f"Metrics saved to {metrics_file}")
+            
+            return all_metrics
+    
+    elif analysis_choice == '2' and len(original_pred_shape) > 2:
+        # Original code for analyzing a specific feature
         # Show available features
         print("\nAvailable features:")
         for i, name in enumerate(column_names[:pred_unscaled.shape[2]]):

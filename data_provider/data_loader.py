@@ -203,7 +203,7 @@ class Dataset_ETT_minute(Dataset):
 class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
-                 target='OT', scale=True, timeenc=0, freq='h', seasonal_patterns=None, percent=100):
+                 target=None, scale=True, timeenc=0, freq='h', seasonal_patterns=None, percent=100):
         # size [seq_len, label_len, pred_len]
         # info
         if size == None:
@@ -239,6 +239,8 @@ class Dataset_Custom(Dataset):
         df_raw.columns: ['date', ...(other features), target feature]
         '''
         cols = list(df_raw.columns)
+        if self.target is None:
+            self.target = cols[1] # default target is first feature after date
         cols.remove(self.target)
         cols.remove('date')
         df_raw = df_raw[['date'] + cols + [self.target]]
