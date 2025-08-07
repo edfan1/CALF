@@ -43,7 +43,7 @@ do
       echo "Model dimensions: enc_in=$enc_in, c_out=$c_out"
       
       python3 run.py \
-          --root_path ./datasets/results/clustering_snmp_2018_1hourinterval/grouped_columns \
+          --root_path ./datasets/network/clustering_snmp_2018_1hourinterval/grouped_columns \
           --data_path $dataset \
           --is_training 1 \
           --task_name long_term_forecast \
@@ -72,7 +72,6 @@ do
           --output_loss smooth_l1 \
           --enc_in $enc_in \
           --c_out $c_out \
-          --target SACR_SUNN_in
       
       echo "=== EXPERIMENT END: $(date) ==="
     } > "$log_file" 2>&1
