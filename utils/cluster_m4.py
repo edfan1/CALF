@@ -101,7 +101,7 @@ def cluster_m4_data(pattern, max_series=500):
             print(f"Error in time series clustering: {e}")
         
         # DTW clustering - only do this for smaller datasets due to computational complexity
-        if len(numeric_cols) <= 100:
+        if len(numeric_cols) <= 100 and len(df) <= 10 ** 4:
             print("\nPerforming DTW clustering...")
             try:
                 dtw_groups = dtw_clustering(df, numeric_cols, timestamp_col, output_dir, max_warp_ratio=0.05)
