@@ -2,6 +2,8 @@ from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Data
     MSLSegLoader, SMAPSegLoader, SMDSegLoader, SWATSegLoader, UEAloader
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
+from data_provider.m4_clustered import Dataset_M4_Clustered
+
 
 data_dict = {
     'ETTh1': Dataset_ETT_hour,
@@ -15,7 +17,8 @@ data_dict = {
     'SMAP': SMAPSegLoader,
     'SMD': SMDSegLoader,
     'SWAT': SWATSegLoader,
-    'UEA': UEAloader
+    'UEA': UEAloader,
+    'm4_clustered': Dataset_M4_Clustered
 }
 
 
