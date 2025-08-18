@@ -4,23 +4,27 @@ seq_len=168
 model=CALF
 
 # Loop through different datasets
-for dataset in snmp_2018_1hourinterval_Spearman_group_1.csv snmp_2018_1hourinterval_Spearman_group_2.csv
+for dataset in snmp_2018_1hourinterval_Feature_group_1.csv snmp_2018_1hourinterval_Feature_group_2.csv snmp_2018_1hourinterval_Feature_group_3.csv
 do
   # Extract dataset name without extension
   dataset_name=$(basename "${dataset%.*}")
   # Replace [[ ]] syntax with [ ] syntax
   if [ -n "$(echo "$dataset_name" | grep "group_1")" ]; then
-    enc_in=77
-    c_out=77
-    echo "Setting Feature-based dimensions: enc_in=$enc_in, c_out=$c_out"
+    enc_in=46
+    c_out=46
+    echo "Setting group 1 dimensions: enc_in=$enc_in, c_out=$c_out"
   elif [ -n "$(echo "$dataset_name" | grep "group_2")" ]; then
-    enc_in=19
-    c_out=19
-    echo "Setting Pearson-based dimensions: enc_in=$enc_in, c_out=$c_out"
-  elif [ -n "$(echo "$dataset_name" | grep "Spearman")" ]; then
-    enc_in=77
-    c_out=77
-    echo "Setting Spearman-based dimensions: enc_in=$enc_in, c_out=$c_out"
+    enc_in=44
+    c_out=44
+    echo "Setting group 2 dimensions: enc_in=$enc_in, c_out=$c_out"
+  elif [ -n "$(echo "$dataset_name" | grep "group_3")" ]; then
+    enc_in=3
+    c_out=3
+    echo "Setting group 3 dimensions: enc_in=$enc_in, c_out=$c_out"
+  elif [ -n "$(echo "$dataset_name" | grep "group_4")" ]; then
+    enc_in=3
+    c_out=3
+    echo "Setting group 4 dimensions: enc_in=$enc_in, c_out=$c_out"
   else
     # Default fallback
     enc_in=96
