@@ -41,7 +41,7 @@ def load_and_prepare_data(filepath):
     # If no datetime column found, check for column names containing time-related terms
     if timestamp_col is None:
         for col in df.columns:
-            if 'time' in col.lower() or 'date' in col.lower() or 'timestamp' in col.lower():
+            if 'time' in col.lower() or 'date' in col.lower() or 'timestamp' in col.lower() or 'v1' in col.lower():
                 timestamp_col = col
                 if col in numeric_cols:
                     numeric_cols.remove(col)
